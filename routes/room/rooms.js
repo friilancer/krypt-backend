@@ -1,9 +1,13 @@
 const express = require('express');
 const Router = express.Router();
 const Room = require('../../Models/rooms');
-
+const jwt_auth =  require('../../auth/passport-jwt-middleware');
 //Update rooms
 //@access Admin
+
+Router.get('/', jwt_auth, (req, res) => {
+	res.send('See rooms')
+})
 
 Router.post('/', (req, res) => {
 	console.log(req.body.name);

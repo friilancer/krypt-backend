@@ -4,12 +4,16 @@ const Schema = mongoose.Schema;
 
 //New Guest
 const GuestSchema = new Schema({
-	name : {
+	firstName : {
+		type : String,
+		required : true
+	},
+	lastName : {
 		type : String,
 		required : true
 	},
 	email : {
-		type : String
+		type : String,
 		required : true,
 		unique : true
 	},
@@ -17,6 +21,10 @@ const GuestSchema = new Schema({
 		type : Number,
 		required : true,
 		unique : true
+	},
+	password : {
+		type: String,
+		required: true
 	},
 	registerDate : {
 		type : Date,

@@ -1,15 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
 const app = express();
+require('dotenv').config();
+const passport = require('passport')
 
-
+require('./auth/passport-jwt')(passport)
 //Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
 
-//DB config 
-const db = require('./config').mongoURI;
+
+//Passport middleware
+app.use(passport.initialize());
+
 
 //DB options
 const options = {
@@ -19,13 +22,15 @@ const options = {
 }
 
 //Connect to Mongo database
-mongoose.connect(db, options, () => {
+mongoose.connect(process.env.DB_URI, options, () => {
 	console.log(`Database connected`);
 })
 
 
 //Routes
-app.use('/api/rooms', require('./routes/api/rooms'));
+app.use('/api/rooms', require('./routes/room/rooms'));
+app.use('/api/guest/register', require('./routes/guest/register'))
+app.use('/api/guest/login', require('./routes/guest/login'))
 
 const port = process.env.PORT || 5000;
 
