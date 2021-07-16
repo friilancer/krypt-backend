@@ -12,10 +12,11 @@ const RoomSchema = new Schema({
 		type : Number,
 		required : true
 	},
-	occupied : {
-		type : Boolean,
-		default : false
+	roomType: {
+		type: String,
+		required: true,
+		enum: ['doubleDeluxe', 'deluxe', 'single']
 	}
 })
 
-module.exports = Room = mongoose.model('Room', RoomSchema)
+module.exports = Room = mongoose.model('Room', RoomSchema);
