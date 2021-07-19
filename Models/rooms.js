@@ -15,7 +15,7 @@ const RoomSchema = new Schema({
 	roomType: {
 		type: String,
 		required: true,
-		enum: ['doubleDeluxe', 'deluxe', 'single']
+		enum: ['Double Deluxe', 'Deluxe', 'Single']
 	}
 })
 

@@ -24,6 +24,7 @@ const getUnavailableRooms = async(from, to, rooms) => {
 			}
 		}
 	]}).select('rooms -__v -_id')
+	return bookedRooms;
 }
 
 const validateAvailability = async(rooms) => {
@@ -34,20 +35,64 @@ const validateAvailability = async(rooms) => {
 	}
 }
 
-Router.post('/', jwt_auth, (req, res) => {
-	const {rooms, from, to, guests} = req.body;
-	let maxGuests = rooms.length * 2;
 
-	if(guests > maxGuests){
+const getMaximumsGuests  = (rooms) => {
+	let roomsBooked = 0;
+	for(let [room, guests] of Object.entries(rooms)){
+		roomsBooked += guests;
+	}
+	return roomsBooked * 2;
+} 
+
+
+//Get room ids for booked room types
+const getRoomIds = async(rooms) => {
+	let types = {
+		doubleDeluxe: 'Double Deluxe',
+		deluxe: 'Deluxe',
+		single: 'Single'
+	}
+
+	let roomTypes = []
+	for(let [room, guests] of Object.entries(rooms)){
+		guests > 0 && roomTypes.push(types[room]);
+	}
+
+	let ids = await Rooms.find({roomType : {
+		$in: roomTypes
+	}}).select('_id')
+
+	return ids
+}
+Router.post('/', async(req, res) => {
+	const {rooms, from, to, guestNumber} = req.body;
+	let maxGuests = getMaximumsGuests(rooms);
+	let roomIds =  await getRoomIds(rooms);
+	console.log(roomIds)
+
+	if(guestNumber > maxGuests){
 		return res.status(400).json({
-			errorMessage: 'Number of guests exceeded for booked rooms'
+			errorMessage: `Number of guests,${guestNumber} exceeded maximum,${maxGuests}`
 		})
 	}
 
-	let roomStatus = getUnavailableRooms(from, to, rooms);
-
+	let roomStatus = false;
+	//let roomStatus = getUnavailableRooms(from, to, rooms);
+	return res.json({maxGuests})
 	if(!roomStatus){
 		//Proceed to do booking
+		let newBooking = new Booking({
+			from: dayjs(format).format('YYYY-MM-DD'),
+			to: dayjs(to).format('YYYY-MM-DD'),
+			rooms,
+			guestNumber
+		})
+
+		res.json({
+			from: newBooking.from,
+			to: newBooking.to,
+			guestNumber: Booking.guestNumber
+		})
 	}else{
 		return res.status(400).json({
 			errorMessage: roomStatus

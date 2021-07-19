@@ -5,9 +5,12 @@ const jwt_auth =  require('../../auth/passport-jwt-middleware');
 
 //Update rooms
 //@access Admin
-Router.get('/', jwt_auth, (req, res) => {
-	res.send('See rooms')
+Router.get('/', async(req, res) => {
+	let rooms = Room.find({});
+	res.json(rooms);
 })
+
+
 
 Router.post('/', (req, res) => {
 	const {name, price, roomType} = req.body;
@@ -30,6 +33,10 @@ Router.post('/', (req, res) => {
 
 		newRoom.save().then( room => {
 			res.json({room});
+		}).catch(err => {
+			res.status(400).json({
+				errorMessage: 'Could not create new room'
+			})
 		})
 	})
 })
