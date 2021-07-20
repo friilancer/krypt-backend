@@ -15,9 +15,14 @@ const BookingSchema = new Schema({
 		required: true
 	},
 	rooms:[{
-		roomId : {
+		_id : {
 			type: mongoose.ObjectId,
 			required: true
+		},
+		roomType: {
+			type : String,
+			required: true,
+			enum: ['Double Deluxe', 'Deluxe', 'Single']
 		}
 	}],
 	guestNumber:{
