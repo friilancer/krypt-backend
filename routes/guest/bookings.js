@@ -7,7 +7,6 @@ const dayOfYear =  require('dayjs/plugin/dayOfYear');
 
 dayjs.extend(dayOfYear);
 
-//dayjs().add(1, 'd').add(3, 'M').format('YYYY-MM-DD')
 const serialiseRooms = (i, obj) => {
 	if(i.roomType === 'Double Deluxe'){
 		obj.doubleDeluxe = obj.doubleDeluxe ?  [...obj.doubleDeluxe, i._id] : [i._id];
@@ -83,6 +82,19 @@ const getMaximumsGuests  = (rooms) => {
 	return roomsBooked * 2;
 } 
 
+const isDateInvalid = (to, from) => {
+	let fromIsBeforeToday = dayjs().isAfter(from, 'd')
+	if(fromIsBeforeToday) return {errorMessage: 'Date is invalid'};
+	let toIsBeforeToday = dayjs().isAfter(to, 'd')
+	if(toIsBeforeToday) return {errorMessage: 'Date is invalid'}
+	let toisBeforefrom = dayjs(to).isBefore(from, 'd');
+	if(toisBeforefrom) return {errorMessage: 'Date is invalid'}
+	let fromIsWithinThreeMonths = dayjs(dayjs().add(1, 'd').add(3, 'M').format('YYYY-MM-DD')).isAfter(from, 'd');
+	if(!fromIsWithinThreeMonths) return {errorMessage: 'Booking has to be within three months'}
+	let toIsWithinThreeMonths = dayjs(dayjs().add(1, 'd').add(3, 'M').format('YYYY-MM-DD')).isAfter(to, 'd');
+	if(!toIsWithinThreeMonths) return {errorMessage: 'Booking has to be within three months'}
+	return false;
+}
 const validateRoomAvailability = (freeRooms, rooms) => {
 	let types = {
 		doubleDeluxe: 'Double Deluxe',
@@ -119,43 +131,69 @@ const bookRooms = (freeRooms, rooms) => {
 
 	return roomBooking;
 }
-Router.post('/', async(req, res) => {
-	const {rooms, from, to, guestNumber} = req.body;
-	let maxGuests = getMaximumsGuests(rooms);
-	let roomTypes = await getRoomTypes(rooms)
-	let freeRooms = await getAvailableRooms(from, to, roomTypes);
-	let roomStatus = validateRoomAvailability(freeRooms, rooms)
-	let bookings = bookRooms(freeRooms, rooms);
-	
-	if(guestNumber > maxGuests){
-		return res.status(400).json({
-			errorMessage: `Number of guests,${guestNumber} exceeded maximum,${maxGuests}`
+
+const checkBookingValidity = async(req, res, next) => {
+	try{
+		const {rooms, from, to, guestNumber} = req.body;
+		let dateValidation = isDateInvalid(to, from);
+		if(dateValidation){
+			return res.status(400).json(dateValidation)
+		}
+		let maxGuests = getMaximumsGuests(rooms);
+		let roomTypes = await getRoomTypes(rooms)
+		let freeRooms = await getAvailableRooms(from, to, roomTypes);
+		let roomStatus = validateRoomAvailability(freeRooms, rooms)
+		
+		if(guestNumber > maxGuests){
+			return res.status(400).json({
+				errorMessage: `Number of guests,${guestNumber} exceeded maximum,${maxGuests}`
+			})
+		}
+
+		if(roomStatus) return res.status(400).json(roomStatus)
+		next();
+	}catch(e){
+		res.status(500).json({
+			errorMessage: "Booking could not be placed at this time"
 		})
 	}
 
-	//Determine availability of number of rooms
+}
+
+Router.put('/', jwt_auth, (req, res) => {
+	return res.json({e : 'done'})
+})
+
+Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
+	try{
+		const {rooms, from, to, guestNumber} = req.body;
+		const {user} = req;
+		let roomTypes = await getRoomTypes(rooms)
+		let freeRooms = await getAvailableRooms(from, to, roomTypes);
+		let bookings = bookRooms(freeRooms, rooms);
+
 	
-	if(!roomStatus){
-		return res.json({bookings});
 		//Proceed to do booking
 		let newBooking = new Booking({
+			userId:user._id,
 			from: dayjs(from).format('YYYY-MM-DD'),
 			to: dayjs(to).format('YYYY-MM-DD'),
-			rooms: roomIds[0],
+			rooms: bookings,
 			guestNumber
 		})
 
-		res.json({
-			from: newBooking.from,
-			to: newBooking.to,
-			rooms: newBooking.rooms,
-			guestNumber: Booking.guestNumber
+		newBooking.save().then(booking => {
+			res.json(booking)
+		}).catch(e => {
+			res.status(500).json({
+				errorMessage: "Booking could not be placed at this time"
+			})
 		})
-	}else{
-		return res.status(400).json(roomStatus)
+	
+	}catch(e){
+		res.status(500).json({
+			errorMessage: "Booking could not be placed at this time"
+		})
 	}
-
-
-
 })
 module.exports = Router;

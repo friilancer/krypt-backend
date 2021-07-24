@@ -8,6 +8,7 @@ const jwt_auth = (req, res, next) => {
 		if(!user){
 			return res.status(401).json({Error: 'Invalid login credentials'})
 		}
+		req.user = user;
 		next()
   	})(req, res, next);
 }
