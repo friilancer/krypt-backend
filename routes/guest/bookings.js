@@ -17,7 +17,7 @@ const serialiseRooms = (i, obj) => {
 	}	
 }
 
-const getAvailableRooms = async(from, to, roomTypes) => {
+const getAvailableRooms = async({from, to, roomTypes, id}) => {
 	let bookings = await Booking.find({$or: [
 		{
 			from: {
@@ -31,7 +31,7 @@ const getAvailableRooms = async(from, to, roomTypes) => {
 				$lte: to
 			}
 		}
-	]}).select('rooms -_id');
+	]}).select('rooms');
 
 	let roomIds = []
 	for(booking of bookings){
@@ -120,8 +120,8 @@ const bookRooms = (freeRooms, rooms) => {
 	}
 
 	let roomBooking = [];
-	for(let [room, guests] of Object.entries(rooms)){
-		for(let i = 0; i < guests; i++){
+	for(let [room, selections] of Object.entries(rooms)){
+		for(let i = 0; i < selections; i++){
 			roomBooking.push({
 				_id: freeRooms[room][i],
 				roomType: types[room]
@@ -134,14 +134,14 @@ const bookRooms = (freeRooms, rooms) => {
 
 const checkBookingValidity = async(req, res, next) => {
 	try{
-		const {rooms, from, to, guestNumber} = req.body;
+		const {id, rooms, from, to, guestNumber} = req.body;
 		let dateValidation = isDateInvalid(to, from);
 		if(dateValidation){
 			return res.status(400).json(dateValidation)
 		}
 		let maxGuests = getMaximumsGuests(rooms);
 		let roomTypes = await getRoomTypes(rooms)
-		let freeRooms = await getAvailableRooms(from, to, roomTypes);
+		let freeRooms = await getAvailableRooms({from, to, roomTypes, id});
 		let roomStatus = validateRoomAvailability(freeRooms, rooms)
 		
 		if(guestNumber > maxGuests){
@@ -150,26 +150,64 @@ const checkBookingValidity = async(req, res, next) => {
 			})
 		}
 
-		if(roomStatus) return res.status(400).json(roomStatus)
+		if(roomStatus) return res.status(400).json(roomStatus);
+		req.freeRooms = freeRooms;
 		next();
+	}catch(e){
+		if(e){
+			res.status(500).json({
+				errorMessage: "Booking could not be placed at this time"
+			})
+		}
+	}
+
+}
+
+const getPrice = async({rooms, from, to}) => {
+	try{
+		let types = {
+			doubleDeluxe: 'Double Deluxe',
+			deluxe: 'Deluxe',
+			single: 'Single'
+		}
+
+		let price = 0;
+		for(let [room, selections] of Object.entries(rooms)){
+			let roomType =	await Rooms.findOne({roomType : types[room]}).select('price');
+			price += roomType.price * selections
+		}
+		
+		let duration = dayjs(to).diff(dayjs(from), 'd');
+		price *= duration
+		return price;
+
+	}catch(e) {
+		res.status(500).json({
+			errorMessage: "Booking could not be placed at this time"
+		})
+	}
+}
+
+
+Router.post('/validation', jwt_auth, checkBookingValidity, async(req, res) => {
+	try{
+		const {rooms, from, to, guestNumber} = req.body;
+		const price = await getPrice({rooms, from, to});
+		return res.json({price})
+	
 	}catch(e){
 		res.status(500).json({
 			errorMessage: "Booking could not be placed at this time"
 		})
 	}
-
-}
-
-Router.put('/', jwt_auth, (req, res) => {
-	return res.json({e : 'done'})
 })
 
 Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 	try{
 		const {rooms, from, to, guestNumber} = req.body;
-		const {user} = req;
-		let roomTypes = await getRoomTypes(rooms)
-		let freeRooms = await getAvailableRooms(from, to, roomTypes);
+		const price = await getPrice({rooms, from, to});
+		return res.json({price})
+		const {user, freeRooms} = req;
 		let bookings = bookRooms(freeRooms, rooms);
 
 	
@@ -196,4 +234,32 @@ Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 		})
 	}
 })
+
+Router.get('/', jwt_auth, async(req, res) => {
+	let {user} = req;
+	try {
+		let bookings = await Booking.find({userId: user._id});
+		res.json(bookings);
+
+	} catch (error) {
+		if(err){
+			res.status(500).json({
+				errorMessage: "Bookings could not be fetched at this time"
+			})
+		}
+	}
+})
+
+Router.delete('/', jwt_auth, async(req, res) => {
+	try {
+		
+	} catch (error) {
+		if(err){
+			res.status(500).json({
+				errorMessage: "Could not delete booking at this time"
+			})
+		}
+	}
+})
+
 module.exports = Router;
