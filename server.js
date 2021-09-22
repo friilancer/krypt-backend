@@ -22,7 +22,11 @@ const options = {
 }
 
 //Connect to Mongo database
-mongoose.connect(process.env.DB_URI, options, () => {
+mongoose.connect(process.env.DB_URI, options, (error) => {
+	if(error){
+		console.log(error);
+		return error;
+	}
 	console.log(`Database connected`);
 })
 
@@ -32,6 +36,7 @@ app.use('/api/rooms', require('./routes/room/rooms'));
 app.use('/api/guest/register', require('./routes/guest/register'));
 app.use('/api/guest/booking', require('./routes/guest/bookings'));
 app.use('/api/guest/login', require('./routes/guest/login'))
+app.use('/api/guest/verify', require('./routes/guest/verify'))
 
 const port = process.env.PORT || 5000;
 

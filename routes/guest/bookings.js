@@ -191,7 +191,7 @@ const getPrice = async({rooms, from, to}) => {
 
 Router.post('/validation', jwt_auth, checkBookingValidity, async(req, res) => {
 	try{
-		const {rooms, from, to, guestNumber} = req.body;
+		const {rooms, from, to} = req.body;
 		const price = await getPrice({rooms, from, to});
 		return res.json({price})
 	
@@ -206,7 +206,6 @@ Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 	try{
 		const {rooms, from, to, guestNumber} = req.body;
 		const price = await getPrice({rooms, from, to});
-		return res.json({price})
 		const {user, freeRooms} = req;
 		let bookings = bookRooms(freeRooms, rooms);
 
