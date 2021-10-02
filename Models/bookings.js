@@ -29,10 +29,28 @@ const BookingSchema = new Schema({
 		type: Number,
 		required: true
 	},
-	dateBooked: {
+	reference: {
+		type:String,
+		required: true
+	},
+	transaction: {
+		type:String,
+		required:true
+	},
+	paymentDate: {
 		type: Date,
 		default: Date.now,
-		required: true,
+		required: true
+	},
+	amount: {
+		type: Number,
+		required: true
+	},
+	currency:{
+		type:String,
+		default:'Kobo',
+		required:true,
+		enum:['Kobo']
 	},
 	expired: {
 		type: Boolean,

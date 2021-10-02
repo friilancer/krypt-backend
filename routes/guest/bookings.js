@@ -57,6 +57,7 @@ const getAvailableRooms = async({from, to, roomTypes, id}) => {
 	for(let i of ids){
 		serialiseRooms(i, obj)
 	}
+
 	return obj
 }
 
@@ -102,7 +103,9 @@ const validateRoomAvailability = (freeRooms, rooms) => {
 		single: 'Single'
 	}
 
+
 	for(let [room, guests] of Object.entries(rooms)){
+		console.log(guests, freeRooms[room].length)
 		if(guests > freeRooms[room].length){
 			return {
 				errorMessage: `Only ${freeRooms[room].length} ${types[room]} ${freeRooms[room].length > 1 ? 'rooms' : 'room'} available`}
@@ -154,11 +157,12 @@ const checkBookingValidity = async(req, res, next) => {
 		req.freeRooms = freeRooms;
 		next();
 	}catch(e){
-		if(e){
-			res.status(500).json({
-				errorMessage: "Booking could not be placed at this time"
+		console.log(e)
+		console.log('One of the selected rooms is unavailable')
+		return res.status(500).json({
+				errorMessage: "One of the selected rooms is unavailable"
 			})
-		}
+		
 	}
 
 }
@@ -182,7 +186,7 @@ const getPrice = async({rooms, from, to}) => {
 		return price;
 
 	}catch(e) {
-		res.status(500).json({
+		return res.status(500).json({
 			errorMessage: "Booking could not be placed at this time"
 		})
 	}
@@ -196,19 +200,26 @@ Router.post('/validation', jwt_auth, checkBookingValidity, async(req, res) => {
 		return res.json({price})
 	
 	}catch(e){
-		res.status(500).json({
-			errorMessage: "Booking could not be placed at this time"
+		console.log('Could not validate booking')
+		return res.status(500).json({
+			errorMessage: "Could not validate booking"
 		})
 	}
 })
 
 Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 	try{
-		const {rooms, from, to, guestNumber} = req.body;
+		const {rooms, from, to, guestNumber, reference, transaction, amount} = req.body;
 		const price = await getPrice({rooms, from, to});
+	
+		if(price !== amount) {
+			return res.status(400).json({
+				errorMessage: 'Fee disparity'
+			})
+		}
+
 		const {user, freeRooms} = req;
 		let bookings = bookRooms(freeRooms, rooms);
-
 	
 		//Proceed to do booking
 		let newBooking = new Booking({
@@ -216,13 +227,16 @@ Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 			from: dayjs(from).format('YYYY-MM-DD'),
 			to: dayjs(to).format('YYYY-MM-DD'),
 			rooms: bookings,
-			guestNumber
+			guestNumber,
+			reference,				
+			transaction,
+			amount
 		})
-
+		
 		newBooking.save().then(booking => {
-			res.json(booking)
+			return res.json(booking)
 		}).catch(e => {
-			res.status(500).json({
+			return res.status(500).json({
 				errorMessage: "Booking could not be placed at this time"
 			})
 		})

@@ -2,13 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 require('dotenv').config();
-const passport = require('passport')
+const passport = require('passport');
+const cors = require('cors');
 
 require('./auth/passport-jwt')(passport)
 //Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
-
+app.use(cors())
 
 //Passport middleware
 app.use(passport.initialize());
