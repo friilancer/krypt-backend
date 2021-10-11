@@ -35,7 +35,7 @@ Router.post('/', (req, res) => {
 						jwt.sign(
 							{id: guest.id},
 							process.env.JWT_SECRET,
-							{expiresIn : 864000},
+							{expiresIn : '7d'},
 							(err, token) => {
 								if(err){
 									return res.status(500).json({Error: 'Server could not create token'})

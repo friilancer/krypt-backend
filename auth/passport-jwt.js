@@ -1,5 +1,5 @@
 const Guest  = require('../Models/guests');
-const bcrypt = require('bcryptjs');
+
 const JWTStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const options = {}
@@ -11,13 +11,13 @@ options.ignoreExpiration = false
 module.exports = (passport) => {
 	passport.use(
 		new JWTStrategy(options, (jwt_payload, done) => {
-			Guest.findOne({id: jwt_payload.sub})
-				.select('firstName')
+			Guest.findById(jwt_payload.id)
 				.then(guest => {
-				if(!guest){
+				if(guest){
+					return done(null, guest)
+				}else{
 					return done(null, false, {Error: 'User does not exist'})
 				}
-				return done(null, guest)
 			}).catch(err => {
 				console.log(err)
 			})

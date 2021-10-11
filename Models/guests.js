@@ -10,7 +10,7 @@ const GuestSchema = new Schema({
 	},
 	lastName : {
 		type : String,
-		required : true
+		required: true
 	},
 	email : {
 		type : String,
@@ -19,12 +19,10 @@ const GuestSchema = new Schema({
 	},
 	phoneNumber : {
 		type : Number,
-		required : true,
 		unique : true
 	},
 	password : {
 		type: String,
-		required: true
 	},
 	registerDate : {
 		type : Date,
