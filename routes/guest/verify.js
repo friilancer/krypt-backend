@@ -5,6 +5,7 @@ const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const jwt = require('jsonwebtoken');
 
+
 Router.get('/', jwt_auth, (req, res) => {
     try{
         const user = req.user;
@@ -27,8 +28,7 @@ Router.post('/googleUser', async (req, res) => {
         let {email, given_name, family_name} = payload
 
         let user = await Guest.findOne({email});
-        if(user){
-            console.log(`prev ${user.id}`)				
+        if(user){			
 			let jwtToken = await jwt.sign(
 				{id: user.id},
 				process.env.JWT_SECRET,
@@ -77,5 +77,6 @@ Router.post('/googleUser', async (req, res) => {
         return res.status(500).json({errorMessage: 'Could not verify google user'})
     }
 })
+
 
 module.exports = Router

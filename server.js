@@ -4,8 +4,10 @@ const app = express();
 require('dotenv').config();
 const passport = require('passport');
 const cors = require('cors');
+require('./jobs/cancelBookings')()
 
 require('./auth/passport-jwt')(passport)
+
 //Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
