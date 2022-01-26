@@ -178,9 +178,10 @@ Router.post('/', jwt_auth, checkBookingValidity, async(req, res) => {
 Router.get('/', jwt_auth, async(req, res) => {
 	let {user} = req;
 	try {
-		let bookings = await Booking.find({userId: user._id});
+		let bookings = await Booking.find({userId: user._id})
+			.where('expired').equals(false)
+			.select('from to amount rooms guestNumber expired');
 		res.json(bookings);
-
 	} catch (error) {
 		if(err){
 			res.status(500).json({
@@ -190,11 +191,17 @@ Router.get('/', jwt_auth, async(req, res) => {
 	}
 })
 
-Router.delete('/', jwt_auth, async(req, res) => {
+Router.delete('/:bookingId', jwt_auth, async(req, res) => {
+	let {bookingId} = req.params
+	console.log(bookingId)
 	try {
-		
+		await Booking.findByIdAndUpdate(bookingId, {expired : true})
+		res.json({
+			message: 'Booking status updated',
+			status: 'completed'	
+		})
 	} catch (error) {
-		if(err){
+		if(error){
 			res.status(500).json({
 				errorMessage: "Could not delete booking at this time"
 			})

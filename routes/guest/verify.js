@@ -54,15 +54,14 @@ Router.post('/googleUser', async (req, res) => {
 			})
 
             let savedGuest = await newGuest.save();
-                console.log(savedGuest.id)
             let jwtToken = await jwt.sign(
                 {id: savedGuest.id},
                 process.env.JWT_SECRET,
-                {expiresIn : 864000}
+                {expiresIn : '7d'}
             )
 
             return res.json({
-                jwtToken,
+                token: jwtToken,
                 user:{
                     id:savedGuest.id,
                     firstName: savedGuest.firstName,

@@ -13,7 +13,6 @@ rule.tz = 'Etc/UTC'
 
 module.exports = () => schedule.scheduleJob(rule, async() => {
     try{
-        console.log('chat shit')
         let bookings = await Booking.find({
             to: {
                 $lte: dayjs().format('YYYY-MM-DD')
@@ -24,7 +23,6 @@ module.exports = () => schedule.scheduleJob(rule, async() => {
            bookings[i].expired = true;
            await bookings[i].save()
        }
-
         console.log('Expired Bookings have been cancelled')
 
     }catch(e){

@@ -33,7 +33,7 @@ const validateRoomAvailability = (freeRooms, rooms) => {
 
 	for(let [room, guests] of Object.entries(rooms)){
 	
-		if(guests > freeRooms[room].length){
+		if(freeRooms[room].length > 0 && guests > freeRooms[room].length){
 			return {
 				errorMessage: `Only ${freeRooms[room].length} ${types[room]} ${freeRooms[room].length > 1 ? 'rooms' : 'room'} available`}
 		}

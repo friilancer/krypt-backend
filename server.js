@@ -25,13 +25,15 @@ const options = {
 }
 
 //Connect to Mongo database
-mongoose.connect(process.env.DB_URI, options, (error) => {
+const connectToDatabase = async() => {
+	await mongoose.connect(process.env.DB_URI, options, (error) => {
 	if(error){
 		console.log(error);
 		return error;
 	}
 	console.log(`Database connected`);
-})
+	})
+}
 
 
 //Routes
@@ -46,3 +48,5 @@ const port = process.env.PORT || 5000;
 app.listen(port, () => {
 	console.log(`Server started on port ${port}`)
 })
+
+connectToDatabase()

@@ -18,8 +18,7 @@ const GuestSchema = new Schema({
 		unique : true
 	},
 	phoneNumber : {
-		type : Number,
-		unique : true
+		type : Number
 	},
 	password : {
 		type: String,
