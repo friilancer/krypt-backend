@@ -3,7 +3,7 @@ const Rooms = require('../../Models/rooms');
 const Router = require('express').Router();
 const jwt_auth =  require('../../auth/passport-jwt-middleware');
 const dayjs = require('dayjs');
-const dayOfYear =  require('dayjs/plugin/dayOfYear');
+const dayOfYear =  require('dayjs/plugin/dayOfYear')
 const {getMaximumsGuests, getRoomTypes, validateRoomAvailability, bookRooms, isDateInvalid} = require('../../controllers/bookingControllers')
 
 dayjs.extend(dayOfYear);
@@ -32,7 +32,7 @@ const getAvailableRooms = async({from, to, roomTypes, id}) => {
 				$lte: to
 			}
 		}
-	]}).select('rooms');
+	]}).where('expired').equals(false).select('rooms');
 
 	let roomIds = []
 	for(booking of bookings){
@@ -183,7 +183,7 @@ Router.get('/', jwt_auth, async(req, res) => {
 			.select('from to amount rooms guestNumber expired');
 		res.json(bookings);
 	} catch (error) {
-		if(err){
+		if(error){
 			res.status(500).json({
 				errorMessage: "Bookings could not be fetched at this time"
 			})
@@ -193,11 +193,11 @@ Router.get('/', jwt_auth, async(req, res) => {
 
 Router.delete('/:bookingId', jwt_auth, async(req, res) => {
 	let {bookingId} = req.params
-	console.log(bookingId)
+	
 	try {
-		await Booking.findByIdAndUpdate(bookingId, {expired : true})
+		await Booking.findByIdAndDe(bookingId, {expired : true})
 		res.json({
-			message: 'Booking status updated',
+			message: 'Booking Delete',
 			status: 'completed'	
 		})
 	} catch (error) {
