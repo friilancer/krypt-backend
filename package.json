@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server",
+    "start": "pm2 start server.js",
     "server": "nodemon server",
+    "end": "pm2 stop server.js",
     "test": "jest"
   },
   "keywords": [],
@@ -23,10 +24,14 @@
     "mongoose": "^5.11.8",
     "node-schedule": "^2.0.0",
     "passport": "^0.4.1",
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "pm2": "^5.1.2"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",
     "nodemon": "^2.0.6"
+  },
+  "engines": {
+    "node": "16.x"
   }
 }
