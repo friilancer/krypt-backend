@@ -7,13 +7,17 @@
     "start": "pm2 start server.js",
     "server": "nodemon server",
     "end": "pm2 stop server.js",
-    "test": "jest"
+    "test": "jest",
+    "client": "npm start --prefix client",
+    "dev": "concurrently --kill-others-on-fail \"npm run server\" \" npm run client\"",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "concurrently": "^7.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.9.7",
     "express": "^4.17.1",
