@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server",
+    "start": "pm2 start server.js",
     "server": "nodemon server",
     "end": "pm2 stop server.js",
     "test": "jest",
