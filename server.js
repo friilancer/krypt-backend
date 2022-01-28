@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
-require('dotenv').config();
+if(process.env.NODE_ENV !== 'production'){
+	require('dotenv').config();
+}
 const passport = require('passport');
 const cors = require('cors');
 require('./jobs/cancelBookings')()
