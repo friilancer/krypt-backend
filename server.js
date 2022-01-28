@@ -42,7 +42,7 @@ app.use('/api/guest/register', require('./routes/guest/register'));
 app.use('/api/guest/booking', require('./routes/guest/bookings'));
 app.use('/api/guest/login', require('./routes/guest/login'))
 app.use('/api/guest/verify', require('./routes/guest/verify'))
-app.get('/test', (_, res) => {res.send('Hello, from test route')})
+app.get('/', (_, res) => {res.send('Hello, from test route')})
 
 const port = process.env.PORT || 5000;
 
