@@ -7,10 +7,7 @@
     "start": "pm2 start server.js",
     "server": "nodemon server",
     "end": "pm2 stop server.js",
-    "test": "jest",
-    "client": "npm start --prefix client",
-    "dev": "concurrently --kill-others-on-fail \"npm run server\" \" npm run client\"",
-    "heroku-postbuild": "cd client && npm install --only=dev && npm install && npm run build"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
