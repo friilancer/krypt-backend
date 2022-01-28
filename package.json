@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start server.js",
+    "start": "node server",
     "server": "nodemon server",
     "end": "pm2 stop server.js",
     "test": "jest"
@@ -32,7 +32,7 @@
     "nodemon": "^2.0.6"
   },
   "engines": {
-    "node": "16.x",
+    "node": "16.13.2",
     "npm": "8.3.1"
   }
 }
