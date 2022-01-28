@@ -11,4 +11,23 @@ rule.second = '0'
 rule.minute = '0'
 rule.tz = 'Etc/UTC'
 
+module.exports = () => schedule.scheduleJob(rule, async() => {
+    try{
+        let bookings = await Booking.find({
+            to: {
+                $lte: dayjs().format('YYYY-MM-DD')
+            }
+        }).select('expired')
 
+       for(let i = 0; i < bookings.length; i++){
+           bookings[i].expired = true;
+           await bookings[i].save()
+       }
+        console.log('Expired Bookings have been cancelled')
+
+    }catch(e){
+        console.log(e)
+        console.log('Cancelling of Bookings could not be done')
+    }
+
+})
