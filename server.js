@@ -15,9 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended : false}));
 app.use(cors({
 	origin: 'https://axdville.netlify.app/',
-	optionsSuccessStatus: 200,
-	credentials: true
-  }))
+	optionsSuccessStatus: 200
+}))
 
 //Passport middleware
 app.use(passport.initialize());
