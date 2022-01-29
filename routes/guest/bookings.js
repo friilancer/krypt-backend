@@ -209,4 +209,5 @@ Router.delete('/:bookingId', jwt_auth, async(req, res) => {
 	}
 })
 
+
 module.exports = Router;
