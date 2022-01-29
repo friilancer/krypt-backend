@@ -13,10 +13,7 @@ require('./auth/passport-jwt')(passport)
 //Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
-app.use(cors({
-	origin: 'https://axdville.netlify.app',
-	optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
-  }))
+app.use(cors())
 
 //Passport middleware
 app.use(passport.initialize());
